@@ -1,28 +1,32 @@
 const express = require("express");
-const logger = require("morgan");
 const mongoose = require("mongoose");
-const compression = require("compression");
+// require ("dotenv").config();
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 
-app.use(logger("dev"));
-
-app.use(compression());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost/budget", {
-  useNewUrlParser: true,
-  useFindAndModify: false
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/budget", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false
+},
+(error) => {
+  const connectionStatus = !error ? 'Success': 'Error Connecting to database';
+  console.log(connectionStatus);
 });
 
 // routes
 app.use(require("./routes/api.js"));
 
-app.listen(PORT, () => {
-  console.log(`App running on port ${PORT}!`);
-});
+// Start our server so that it can begin listening to client requests.
+app.listen(PORT, function() {
+    // Log (server-side) when our server has started
+    console.log("Aligator listening on: http://localhost:" + PORT);
+  });
